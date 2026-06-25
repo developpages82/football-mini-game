@@ -18,11 +18,25 @@
 4. **Build and deployment** の Source を **Deploy from a branch** にし、Branch を `main`（フォルダは `/root`）に設定して保存します。
 5. 数十秒〜数分後、`https://<ユーザー名>.github.io/<リポジトリ名>/` で公開されます。
 
-## 動作要件
+## 動作要件 / オフラインでの遊び方
 
-- ゲーム本体（Three.js 本体・選手3Dモデル）は `index.html` に同梱／埋め込み済みです。
-- ただし、選手モデルを動かすための追加モジュール（GLTFLoader / SkeletonUtils）は CDN から読み込むため、**初回起動時はインターネット接続が必要**です（cdnjs / jsdelivr / unpkg を自動で順に試します）。
-- 万一それらを読み込めない環境では、自動的に簡易な人型表示にフォールバックして動作します。
+3D描画エンジン **Three.js** は容量が大きいため `index.html` には埋め込まず、起動時に読み込みます。読み込み順は次の通りで、**ローカルファイルを最優先**します。
+
+1. `index.html` と同じフォルダの `three.min.js`（無ければ `libs/` や `vendor/` も探索）
+2. 見つからなければ CDN（cdnjs → jsdelivr → unpkg）を自動で順に試行
+
+つまり、**オンラインなら何も用意せずそのまま動作**します。
+
+### 「3Dライブラリを読み込めませんでした」と出る場合
+
+インターネット未接続、または社内ネット/広告ブロッカーが CDN を遮断しています。オフラインで遊ぶには、ネットに繋がる端末で下記を保存し、`index.html` と同じフォルダに置いてください（1ファイルだけでOK）。
+
+- `three.min.js` ← https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
+
+選手の3Dモデルもオフライン表示したい場合は、次の2つも同じフォルダに追加します（無くても簡易な人型表示で動作します）。
+
+- `GLTFLoader.js` ← https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js
+- `SkeletonUtils.js` ← https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js
 
 ## ファイル構成
 
