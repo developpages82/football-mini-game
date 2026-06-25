@@ -88,36 +88,37 @@
        text-shadow:0 4px 18px rgba(255,180,0,.4);margin-bottom:-6px;}
   #rankBadge.hidden{display:none;}
   .combo{color:var(--accent2);font-weight:900;}
-  /* ==== スマホ操作：画面下部中央に固定したリング型コントローラー ==== */
-  #pad{position:absolute;left:50%;transform:translateX(-50%);
-       bottom:max(22px,calc(env(safe-area-inset-bottom) + 18px));
-       width:230px;height:230px;border-radius:50%;pointer-events:auto;touch-action:none;z-index:4;
+  /* ==== スマホ2本指UI（左:移動&ダッシュ ／ 右:シュート&チャージ） ==== */
+  #padL,#padR{position:absolute;bottom:max(20px,calc(env(safe-area-inset-bottom) + 16px));
+       width:172px;height:172px;border-radius:50%;pointer-events:auto;touch-action:none;z-index:4;
        display:flex;align-items:center;justify-content:center;}
-  #ctl{position:relative;width:150px;height:150px;border-radius:50%;pointer-events:none;
+  #padL{left:max(10px,calc(env(safe-area-inset-left) + 6px));}
+  #padR{right:max(10px,calc(env(safe-area-inset-right) + 6px));}
+  .side{position:relative;width:132px;height:132px;border-radius:50%;pointer-events:none;
        display:flex;align-items:center;justify-content:center;--p:0deg;--s:360deg;
        background:radial-gradient(circle,rgba(255,255,255,.07),rgba(255,255,255,.02));
        border:2px solid rgba(255,255,255,.34);box-shadow:0 6px 20px rgba(0,0,0,.35);
        opacity:.5;transition:opacity .15s, box-shadow .15s, border-color .15s;}
-  #ctl.active{opacity:1;}
-  #ctl::before{content:"";position:absolute;inset:6px;border-radius:50%;
+  .side.active{opacity:1;}
+  #ctlR::before{content:"";position:absolute;inset:6px;border-radius:50%;
        background:conic-gradient(var(--accent2) var(--p,0deg), rgba(255,255,255,.06) 0deg);
-       -webkit-mask:radial-gradient(circle, transparent 58px, #000 60px);
-       mask:radial-gradient(circle, transparent 58px, #000 60px);}
-  #ctl::after{content:"";position:absolute;inset:-7px;border-radius:50%;
+       -webkit-mask:radial-gradient(circle, transparent 51px, #000 53px);
+       mask:radial-gradient(circle, transparent 51px, #000 53px);}
+  #ctlR::after{content:"";position:absolute;inset:-7px;border-radius:50%;
        background:conic-gradient(var(--accent) var(--s,360deg), rgba(255,255,255,.05) 0deg);
-       -webkit-mask:radial-gradient(circle, transparent 70px, #000 72px);
-       mask:radial-gradient(circle, transparent 70px, #000 72px);opacity:.9;}
-  #ctl.mode-move{border-color:rgba(25,211,107,.95);box-shadow:0 0 26px rgba(25,211,107,.5);}
-  #ctl.mode-dash{border-color:rgba(120,210,255,.95);box-shadow:0 0 32px rgba(120,210,255,.6);}
-  #ctl.mode-charge{border-color:rgba(255,210,63,.95);box-shadow:0 0 28px rgba(255,200,40,.55);}
-  #ctlKnob{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eafff3,#19d36b);
+       -webkit-mask:radial-gradient(circle, transparent 62px, #000 64px);
+       mask:radial-gradient(circle, transparent 62px, #000 64px);opacity:.9;}
+  .side.mode-move{border-color:rgba(25,211,107,.95);box-shadow:0 0 26px rgba(25,211,107,.5);}
+  .side.mode-dash{border-color:rgba(120,210,255,.95);box-shadow:0 0 32px rgba(120,210,255,.6);}
+  .side.mode-charge{border-color:rgba(255,210,63,.95);box-shadow:0 0 28px rgba(255,200,40,.55);}
+  .knob{width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eafff3,#19d36b);
        box-shadow:0 4px 14px rgba(0,0,0,.45);will-change:transform;z-index:2;}
-  #ctl.mode-dash #ctlKnob{background:radial-gradient(circle at 35% 30%,#d8f4ff,#1f8fff);}
-  #ctlLabel{position:absolute;font-size:11px;font-weight:900;letter-spacing:.08em;color:#eafff3;
+  .side.mode-dash .knob{background:radial-gradient(circle at 35% 30%,#d8f4ff,#1f8fff);}
+  .lbl{position:absolute;font-size:10px;font-weight:900;letter-spacing:.08em;color:#eafff3;
        text-shadow:0 1px 4px rgba(0,0,0,.7);pointer-events:none;z-index:3;}
   #joy,#shootBtn,#sprintBtn{display:none!important;}
   #power,#stamina{display:none!important;}
-  #hint{bottom:max(262px,calc(env(safe-area-inset-bottom) + 258px));font-size:11px;}
+  #hint{bottom:max(198px,calc(env(safe-area-inset-bottom) + 194px));font-size:10px;line-height:1.6;opacity:.7;}
 </style>
 </head>
 <body>
@@ -152,14 +153,15 @@
       <canvas id="map" width="168" height="256"></canvas>
       <div id="mapLegend"><b style="color:#5ad1ff">●</b>自分 <b style="color:#ff4d5e">●</b>敵 <b style="color:#ffd23f">●</b>GK</div>
     </div>
-    <div class="hint" id="hint">中央リング：ドラッグ＝移動 ／ 前へフリック＝シュート ／ ダブルタップ＝ダッシュ</div>
+    <div class="hint" id="hint">左：ドラッグ＝移動／ダブルタップ＝ダッシュ　　右：フリック＝シュート／長押し＝チャージ<br>PC：WASD・矢印＝移動 ／ Space＝シュート ／ Shift＝ダッシュ</div>
     <div id="joy"><div id="joyKnob"></div></div>
     <div id="shootBtn">SHOOT</div>
     <div id="sprintBtn">DASH</div>
     <div id="stamina"><i id="staminaBar"></i></div>
     <div id="power"><i id="powerBar"></i></div>
     <div id="flash"></div>
-    <div id="pad"><div id="ctl"><div id="ctlKnob"></div><div id="ctlLabel"></div></div></div>
+    <div id="padL"><div id="ctlL" class="side"><div class="knob" id="ctlKnobL"></div><div class="lbl" id="ctlLabelL"></div></div></div>
+    <div id="padR"><div id="ctlR" class="side"><div class="knob" id="ctlKnobR"></div><div class="lbl" id="ctlLabelR"></div></div></div>
   </div>
   <div class="screen" id="startScreen">
     <div class="tag">DRIBBLE STRIKER 3D</div>
@@ -173,10 +175,11 @@
     <div class="stats" id="bestBox">BEST: —</div>
     <button class="cta" id="startBtn">キックオフ</button>
     <div class="small">
-      <b style="color:var(--accent)">片手・親指1本</b>で操作。画面下部中央の固定リングを使います。<br>
-      <b>ドラッグ</b>＝移動　／　<b>前へフリック</b>＝シュート（払う速さ＝強さ・向き＝コース）<br>
-      <b>長押し</b>＝チャージシュート　／　<b>ダブルタップ</b>＝ダッシュ<br>
-      （PCは矢印キー/WASD・Space・Shiftも可）
+      <b style="color:var(--accent)">両手・親指2本</b>で操作します。<br>
+      <b>左リング</b>：ドラッグ＝移動 ／ ダブルタップ＝ダッシュ<br>
+      <b>右リング</b>：前へフリック＝シュート（速さ＝強さ・向き＝コース） ／ 長押し＝チャージ<br>
+      外周の緑＝スタミナ（ダッシュで減少・自動回復）<br>
+      <b style="color:var(--accent2)">PC</b>：WASD/矢印＝移動 ／ Space＝シュート ／ Shift＝ダッシュ
     </div>
   </div>
   <div class="screen hidden" id="resultScreen">
@@ -623,78 +626,73 @@ sprintBtnEl.addEventListener('pointerdown',e=>{e.preventDefault(); SFX.unlock();
 sprintBtnEl.addEventListener('pointerup',e=>{e.preventDefault(); setSprint(false);});
 sprintBtnEl.addEventListener('pointercancel',e=>{ setSprint(false); });
 
-// ===== スマホ片手ジェスチャー操作（中央フローティング） =====
+// ===== スマホ2本指UI（左:移動&ダッシュ ／ 右:シュート&チャージ） =====
 (function(){
-  const PAD=el('pad'), CTL=el('ctl'), KNOB=el('ctlKnob'), LABEL=el('ctlLabel');
-  const RAD=58, DEAD=24, DBL_MS=270, GRACE_MS=150, FLICK_V=0.7;
-  let g=null, lastTapT=-1e9, lastTapX=0, lastTapY=0, pendTap=null;
+  const RAD=58, DEAD=22, DBL_MS=270, GRACE_MS=150, FLICK_V=0.7;
   function now(){ return (window.performance&&performance.now)?performance.now():Date.now(); }
-  function padCenter(){ const r=PAD.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; }
-  function knob(dx,dy){ const d=Math.hypot(dx,dy)||1, cl=Math.min(d,RAD); KNOB.style.transform='translate('+(dx/d*cl).toFixed(1)+'px,'+(dy/d*cl).toFixed(1)+'px)'; }
-  function setMode(m){ CTL.className='active'+(m?' mode-'+m:''); LABEL.textContent = (m==='dash'?'DASH':(m==='charge'?'POWER':'')); }
-  function show(){ CTL.classList.add('active'); }
-  function hide(){ CTL.className=''; CTL.style.setProperty('--p','0deg'); KNOB.style.transform='translate(0,0)'; LABEL.textContent=''; }
-  function flick(){ if(!g||g.samp.length<2) return {v:0,dx:0,dy:0}; const a=g.samp[0], b=g.samp[g.samp.length-1]; const dt=Math.max(8,b.t-a.t); return {v:Math.hypot(b.x-a.x,b.y-a.y)/dt, dx:b.x-a.x, dy:b.y-a.y}; }
-
-  PAD.addEventListener('pointerdown',function(e){
-    e.preventDefault(); SFX.unlock();
-    if(G.screen!=='play' || g) return;
-    const x=e.clientX, y=e.clientY, t=now();
-    if(pendTap){ clearTimeout(pendTap); pendTap=null; }
-    const c=padCenter();
-    const dbl = (t-lastTapT<DBL_MS);
-    g={ id:e.pointerId, ox:c.x, oy:c.y, x:x, y:y, t0:t, mode:(dbl?'dash':'aim'), moved:false, charged:false, grace:null, samp:[{x:x,y:y,t:t}] };
-    show();
-    if(dbl){ setMode('dash'); setSprint(true); G.padActive=true; }
-    else { setMode(''); g.grace=setTimeout(function(){ if(g&&g.mode==='aim'&&!g.moved){ g.charged=true; startCharge(); setMode('charge'); } }, GRACE_MS); }
-    try{ PAD.setPointerCapture(e.pointerId); }catch(_){}
-  });
-  PAD.addEventListener('pointermove',function(e){
-    if(!g||e.pointerId!==g.id) return;
-    const x=e.clientX, y=e.clientY, t=now();
-    g.x=x; g.y=y; g.samp.push({x:x,y:y,t:t}); if(g.samp.length>6) g.samp.shift();
-    const dx=x-g.ox, dy=y-g.oy, d=Math.hypot(dx,dy);
-    if(d>DEAD) g.moved=true;
-    if(g.mode==='aim' && d>DEAD){
-      g.mode='move'; setMode('move'); G.padActive=true;
-      if(g.charged){ G.charging=false; g.charged=false; el('power').classList.remove('show'); }
-      if(g.grace){ clearTimeout(g.grace); g.grace=null; }
-    }
-    if(g.mode==='move'||g.mode==='dash'){
-      const cl=Math.min(d,RAD), nx=dx/(d||1)*cl, ny=dy/(d||1)*cl;
-      knob(nx,ny);
-      G.moveX=Math.max(-1,Math.min(1,nx/RAD));
-      G.moveZ=Math.max(-1,Math.min(1,-ny/RAD));
-    } else { knob(dx,dy); }
-  });
-  function end(e){
-    if(!g||(e&&e.pointerId!=null&&e.pointerId!==g.id)) return;
-    const t=now(), f=flick(), mode=g.mode, ox=g.ox, gx=g.x, dur=t-g.t0;
-    if(g.grace){ clearTimeout(g.grace); g.grace=null; }
-    if(mode==='dash'){
-      if(dur<200){ setSprint(true); setTimeout(function(){ setSprint(false); }, 430); } else setSprint(false);
-      G.moveX=0; G.moveZ=0; G.padActive=false;
-    } else if(mode==='move'){
-      if(f.v>FLICK_V && (-f.dy) > Math.abs(f.dx)*0.15){
-        const aim=Math.max(-1,Math.min(1, f.dx/130));
-        const power=Math.max(0.3,Math.min(1, f.v/2.0));
-        shoot(power, aim);
-      }
-      G.moveX=0; G.moveZ=0; G.padActive=false;
-    } else { // aim: charge or tap
-      if(g.charged){
-        const aim=Math.max(-0.6,Math.min(0.6,(gx-ox)/DEAD*0.6));
-        G.moveX=aim; releaseShoot(); G.moveX=0;
+  function makePad(PAD, CTL, KNOB, LABEL, role){
+    let g=null, lastTapT=-1e9, pend=null;
+    function center(){ const r=PAD.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; }
+    function knob(dx,dy){ const d=Math.hypot(dx,dy)||1, cl=Math.min(d,RAD); KNOB.style.transform='translate('+(dx/d*cl).toFixed(1)+'px,'+(dy/d*cl).toFixed(1)+'px)'; }
+    function setMode(m){ CTL.className='side active'+(m?' mode-'+m:''); LABEL.textContent=(m==='dash'?'DASH':(m==='charge'?'POWER':'')); }
+    function show(){ CTL.classList.add('active'); }
+    function hide(){ CTL.className='side'; KNOB.style.transform='translate(0,0)'; LABEL.textContent=''; if(role==='R') CTL.style.setProperty('--p','0deg'); }
+    function flick(){ if(!g||g.samp.length<2) return {v:0,dx:0,dy:0}; const a=g.samp[0], b=g.samp[g.samp.length-1]; const dt=Math.max(8,b.t-a.t); return {v:Math.hypot(b.x-a.x,b.y-a.y)/dt, dx:b.x-a.x, dy:b.y-a.y}; }
+    PAD.addEventListener('pointerdown',function(e){
+      e.preventDefault(); SFX.unlock();
+      if(G.screen!=='play' || g) return;
+      const x=e.clientX, y=e.clientY, t=now(), c=center();
+      if(pend){ clearTimeout(pend); pend=null; }
+      const dbl=(t-lastTapT<DBL_MS);
+      g={ id:e.pointerId, ox:c.x, oy:c.y, x:x, y:y, t0:t, mode:'aim', moved:false, charged:false, grace:null, samp:[{x:x,y:y,t:t}] };
+      show();
+      if(role==='L'){
+        if(dbl){ g.mode='dash'; setMode('dash'); setSprint(true); G.padActive=true; }
+        else setMode('');
       } else {
-        lastTapT=t; lastTapX=ox; lastTapY=g.oy;
-        const aimGx=gx, aimOx=ox;
-        pendTap=setTimeout(function(){ pendTap=null; if(G.screen==='play'&&G.ballHeld){ const aim=Math.max(-0.6,Math.min(0.6,(aimGx-aimOx)/DEAD*0.6)); shoot(0.3, aim); } }, DBL_MS);
+        setMode('');
+        g.grace=setTimeout(function(){ if(g&&g.mode==='aim'&&!g.moved){ g.charged=true; startCharge(); setMode('charge'); } }, GRACE_MS);
       }
+      try{ PAD.setPointerCapture(e.pointerId); }catch(_){}
+    });
+    PAD.addEventListener('pointermove',function(e){
+      if(!g||e.pointerId!==g.id) return;
+      const x=e.clientX, y=e.clientY, t=now();
+      g.x=x; g.y=y; g.samp.push({x:x,y:y,t:t}); if(g.samp.length>6) g.samp.shift();
+      const dx=x-g.ox, dy=y-g.oy, d=Math.hypot(dx,dy);
+      if(d>DEAD) g.moved=true;
+      if(role==='L'){
+        if(g.mode==='aim' && d>DEAD){ g.mode='move'; setMode('move'); G.padActive=true; }
+        if(g.mode==='move'||g.mode==='dash'){
+          const cl=Math.min(d,RAD), nx=dx/(d||1)*cl, ny=dy/(d||1)*cl; knob(nx,ny);
+          G.moveX=Math.max(-1,Math.min(1,nx/RAD)); G.moveZ=Math.max(-1,Math.min(1,-ny/RAD));
+        } else knob(dx,dy);
+      } else {
+        if(g.mode==='aim' && d>DEAD){ g.mode='flick'; setMode('move'); if(g.charged){ G.charging=false; g.charged=false; el('power').classList.remove('show'); } if(g.grace){ clearTimeout(g.grace); g.grace=null; } }
+        knob(dx,dy);
+      }
+    });
+    function end(e){
+      if(!g||(e&&e.pointerId!=null&&e.pointerId!==g.id)) return;
+      const t=now(), f=flick(), mode=g.mode, ox=g.ox, gx=g.x, dur=t-g.t0;
+      if(g.grace){ clearTimeout(g.grace); g.grace=null; }
+      if(role==='L'){
+        if(mode==='dash'){ if(dur<200){ setSprint(true); setTimeout(function(){ setSprint(false); }, 430); } else setSprint(false); G.moveX=0; G.moveZ=0; G.padActive=false; }
+        else if(mode==='move'){ G.moveX=0; G.moveZ=0; G.padActive=false; }
+        else { lastTapT=t; }
+      } else {
+        const aim=Math.max(-0.6,Math.min(0.6,(gx-ox)/90));
+        if(f.v>FLICK_V && (-f.dy) > Math.abs(f.dx)*0.15){ shoot(Math.max(0.3,Math.min(1, f.v/2.0)), Math.max(-1,Math.min(1, f.dx/130))); }
+        else if(g.charged){ const pwr=G.power; G.charging=false; el('power').classList.remove('show'); shoot(pwr, aim); }
+        else { shoot(0.3, aim); }
+      }
+      hide(); g=null;
     }
-    hide(); g=null;
+    PAD.addEventListener('pointerup',end);
+    PAD.addEventListener('pointercancel',end);
   }
-  PAD.addEventListener('pointerup',end);
-  PAD.addEventListener('pointercancel',end);
+  makePad(el('padL'), el('ctlL'), el('ctlKnobL'), el('ctlLabelL'), 'L');
+  makePad(el('padR'), el('ctlR'), el('ctlKnobR'), el('ctlLabelR'), 'R');
 })();
 el('startBtn').onclick=startGame;
 el('nextBtn').onclick=nextAfterResult;
@@ -751,10 +749,10 @@ function update(dt){
   if(G.sprint && _moving){ G.stamina=Math.max(0,G.stamina-dt/2.2); }
   else { G.stamina=Math.min(1,G.stamina+dt/3.5); }
   el('staminaBar').style.width=(G.stamina*100).toFixed(0)+'%';
-  el('ctl').style.setProperty('--s',(G.stamina*360).toFixed(0)+'deg');
+  el('ctlR').style.setProperty('--s',(G.stamina*360).toFixed(0)+'deg');
   // シュートチャージ
-  if(G.charging){ G.power=Math.min(1,G.power+dt/0.7); el('powerBar').style.width=(G.power*100).toFixed(0)+'%'; el('ctl').style.setProperty('--p',(G.power*360).toFixed(0)+'deg'); }
-  else { el('ctl').style.setProperty('--p','0deg'); }
+  if(G.charging){ G.power=Math.min(1,G.power+dt/0.7); el('powerBar').style.width=(G.power*100).toFixed(0)+'%'; el('ctlR').style.setProperty('--p',(G.power*360).toFixed(0)+'deg'); }
+  else { el('ctlR').style.setProperty('--p','0deg'); }
   const st=STAGES[G.stage];
   const p=player.group.position;
   if(G.ballHeld){
