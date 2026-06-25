@@ -88,36 +88,41 @@
        text-shadow:0 4px 18px rgba(255,180,0,.4);margin-bottom:-6px;}
   #rankBadge.hidden{display:none;}
   .combo{color:var(--accent2);font-weight:900;}
-  /* ==== スマホ片手ジェスチャーUI ==== */
-  #pad{position:absolute;left:0;right:0;top:120px;bottom:0;pointer-events:auto;touch-action:none;}
-  #ctl{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;pointer-events:none;z-index:5;
-       transform:translateZ(0);display:flex;align-items:center;justify-content:center;
-       background:radial-gradient(circle,rgba(255,255,255,.06),rgba(255,255,255,.02));
-       border:2px solid rgba(255,255,255,.38);box-shadow:0 0 26px rgba(0,0,0,.32);--p:0deg;}
-  #ctl.hidden{display:none;}
-  #ctl::before{content:"";position:absolute;inset:-4px;border-radius:50%;
-       background:conic-gradient(var(--accent2) var(--p,0deg), rgba(255,255,255,.07) 0deg);
-       -webkit-mask:radial-gradient(circle, transparent 60px, #000 62px);
-       mask:radial-gradient(circle, transparent 60px, #000 62px);opacity:.95;}
-  #ctl.mode-move{border-color:rgba(25,211,107,.9);box-shadow:0 0 28px rgba(25,211,107,.45);}
-  #ctl.mode-dash{border-color:rgba(120,210,255,.95);box-shadow:0 0 34px rgba(120,210,255,.6);}
-  #ctl.mode-charge{border-color:rgba(255,210,63,.95);box-shadow:0 0 30px rgba(255,200,40,.5);}
-  #ctlKnob{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eafff3,#19d36b);
-       box-shadow:0 4px 14px rgba(0,0,0,.45);will-change:transform;}
+  /* ==== スマホ操作：画面下部中央に固定したリング型コントローラー ==== */
+  #pad{position:absolute;left:50%;transform:translateX(-50%);
+       bottom:max(22px,calc(env(safe-area-inset-bottom) + 18px));
+       width:230px;height:230px;border-radius:50%;pointer-events:auto;touch-action:none;z-index:4;
+       display:flex;align-items:center;justify-content:center;}
+  #ctl{position:relative;width:150px;height:150px;border-radius:50%;pointer-events:none;
+       display:flex;align-items:center;justify-content:center;--p:0deg;--s:360deg;
+       background:radial-gradient(circle,rgba(255,255,255,.07),rgba(255,255,255,.02));
+       border:2px solid rgba(255,255,255,.34);box-shadow:0 6px 20px rgba(0,0,0,.35);
+       opacity:.5;transition:opacity .15s, box-shadow .15s, border-color .15s;}
+  #ctl.active{opacity:1;}
+  #ctl::before{content:"";position:absolute;inset:6px;border-radius:50%;
+       background:conic-gradient(var(--accent2) var(--p,0deg), rgba(255,255,255,.06) 0deg);
+       -webkit-mask:radial-gradient(circle, transparent 58px, #000 60px);
+       mask:radial-gradient(circle, transparent 58px, #000 60px);}
+  #ctl::after{content:"";position:absolute;inset:-7px;border-radius:50%;
+       background:conic-gradient(var(--accent) var(--s,360deg), rgba(255,255,255,.05) 0deg);
+       -webkit-mask:radial-gradient(circle, transparent 70px, #000 72px);
+       mask:radial-gradient(circle, transparent 70px, #000 72px);opacity:.9;}
+  #ctl.mode-move{border-color:rgba(25,211,107,.95);box-shadow:0 0 26px rgba(25,211,107,.5);}
+  #ctl.mode-dash{border-color:rgba(120,210,255,.95);box-shadow:0 0 32px rgba(120,210,255,.6);}
+  #ctl.mode-charge{border-color:rgba(255,210,63,.95);box-shadow:0 0 28px rgba(255,200,40,.55);}
+  #ctlKnob{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eafff3,#19d36b);
+       box-shadow:0 4px 14px rgba(0,0,0,.45);will-change:transform;z-index:2;}
   #ctl.mode-dash #ctlKnob{background:radial-gradient(circle at 35% 30%,#d8f4ff,#1f8fff);}
   #ctlLabel{position:absolute;font-size:11px;font-weight:900;letter-spacing:.08em;color:#eafff3;
-       text-shadow:0 1px 4px rgba(0,0,0,.7);pointer-events:none;}
-  /* 旧UIを無効化し、スタミナを下部中央へ */
+       text-shadow:0 1px 4px rgba(0,0,0,.7);pointer-events:none;z-index:3;}
   #joy,#shootBtn,#sprintBtn{display:none!important;}
-  #power{display:none!important;}
-  #stamina{left:50%;right:auto;transform:translateX(-50%);bottom:max(16px,calc(env(safe-area-inset-bottom) + 14px));width:150px;}
-  #hint{bottom:max(58px,calc(env(safe-area-inset-bottom) + 54px));font-size:11px;}
+  #power,#stamina{display:none!important;}
+  #hint{bottom:max(262px,calc(env(safe-area-inset-bottom) + 258px));font-size:11px;}
 </style>
 </head>
 <body>
 <div id="wrap">
   <div id="hud">
-    <div id="pad"></div>
     <div class="top">
       <div>
         <div class="stage" id="stageLabel">STAGE 1 / 5</div>
@@ -147,14 +152,14 @@
       <canvas id="map" width="168" height="256"></canvas>
       <div id="mapLegend"><b style="color:#5ad1ff">●</b>自分 <b style="color:#ff4d5e">●</b>敵 <b style="color:#ffd23f">●</b>GK</div>
     </div>
-    <div class="hint" id="hint">ドラッグで移動 ・ 前へフリックでシュート ・ ダブルタップでダッシュ</div>
+    <div class="hint" id="hint">中央リング：ドラッグ＝移動 ／ 前へフリック＝シュート ／ ダブルタップ＝ダッシュ</div>
     <div id="joy"><div id="joyKnob"></div></div>
     <div id="shootBtn">SHOOT</div>
     <div id="sprintBtn">DASH</div>
     <div id="stamina"><i id="staminaBar"></i></div>
     <div id="power"><i id="powerBar"></i></div>
     <div id="flash"></div>
-    <div id="ctl" class="hidden"><div id="ctlKnob"></div><div id="ctlLabel"></div></div>
+    <div id="pad"><div id="ctl"><div id="ctlKnob"></div><div id="ctlLabel"></div></div></div>
   </div>
   <div class="screen" id="startScreen">
     <div class="tag">DRIBBLE STRIKER 3D</div>
@@ -168,7 +173,7 @@
     <div class="stats" id="bestBox">BEST: —</div>
     <button class="cta" id="startBtn">キックオフ</button>
     <div class="small">
-      <b style="color:var(--accent)">片手・親指1本</b>で操作。画面中央のどこでもOK。<br>
+      <b style="color:var(--accent)">片手・親指1本</b>で操作。画面下部中央の固定リングを使います。<br>
       <b>ドラッグ</b>＝移動　／　<b>前へフリック</b>＝シュート（払う速さ＝強さ・向き＝コース）<br>
       <b>長押し</b>＝チャージシュート　／　<b>ダブルタップ</b>＝ダッシュ<br>
       （PCは矢印キー/WASD・Space・Shiftも可）
@@ -214,7 +219,7 @@ const PITCH_W=68, PITCH_LEN=105, GOAL_Z=100, GOAL_W=7.32, START_Z=52.5; // 実�
 const TACKLE_R=0.8, PLAYER_FWD=7.2, PLAYER_LAT=6.2; // 奪取は0.8m(ボール寄り), ドリブル走 約7m/s
 const CAM_BACK=8, CAM_HEIGHT=10, CAM_LOOK_AHEAD=2, CAM_FOV=54; // 三人称追従（プレイヤーをほぼ画面中央に）
 const STAGES=[
-  {name:"KICKOFF",  count:3,  defSpeed:5.0, defReact:12, keeperSpeed:3.5, keeperLag:0.50},
+  {name:"KICKOFF",  count:1,  defSpeed:5.0, defReact:12, keeperSpeed:3.5, keeperLag:0.50},
   {name:"PRESSURE", count:5,  defSpeed:5.6, defReact:14, keeperSpeed:4.0, keeperLag:0.42},
   {name:"COUNTER",  count:7,  defSpeed:6.2, defReact:16, keeperSpeed:4.5, keeperLag:0.34},
   {name:"DERBY",    count:9,  defSpeed:6.8, defReact:18, keeperSpeed:5.0, keeperLag:0.26},
@@ -622,13 +627,13 @@ sprintBtnEl.addEventListener('pointercancel',e=>{ setSprint(false); });
 (function(){
   const PAD=el('pad'), CTL=el('ctl'), KNOB=el('ctlKnob'), LABEL=el('ctlLabel');
   const RAD=58, DEAD=24, DBL_MS=270, GRACE_MS=150, FLICK_V=0.7;
-  let g=null, lastTapT=0, lastTapX=0, lastTapY=0, pendTap=null;
+  let g=null, lastTapT=-1e9, lastTapX=0, lastTapY=0, pendTap=null;
   function now(){ return (window.performance&&performance.now)?performance.now():Date.now(); }
-  function placeCtl(x,y){ const r=container.getBoundingClientRect(); CTL.style.left=(x-r.left)+'px'; CTL.style.top=(y-r.top)+'px'; }
+  function padCenter(){ const r=PAD.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; }
   function knob(dx,dy){ const d=Math.hypot(dx,dy)||1, cl=Math.min(d,RAD); KNOB.style.transform='translate('+(dx/d*cl).toFixed(1)+'px,'+(dy/d*cl).toFixed(1)+'px)'; }
-  function setMode(m){ CTL.className=(m?'mode-'+m:''); LABEL.textContent = (m==='dash'?'DASH':(m==='charge'?'POWER':'')); }
-  function show(){ CTL.classList.remove('hidden'); }
-  function hide(){ CTL.classList.add('hidden'); CTL.style.setProperty('--p','0deg'); KNOB.style.transform='translate(0,0)'; LABEL.textContent=''; }
+  function setMode(m){ CTL.className='active'+(m?' mode-'+m:''); LABEL.textContent = (m==='dash'?'DASH':(m==='charge'?'POWER':'')); }
+  function show(){ CTL.classList.add('active'); }
+  function hide(){ CTL.className=''; CTL.style.setProperty('--p','0deg'); KNOB.style.transform='translate(0,0)'; LABEL.textContent=''; }
   function flick(){ if(!g||g.samp.length<2) return {v:0,dx:0,dy:0}; const a=g.samp[0], b=g.samp[g.samp.length-1]; const dt=Math.max(8,b.t-a.t); return {v:Math.hypot(b.x-a.x,b.y-a.y)/dt, dx:b.x-a.x, dy:b.y-a.y}; }
 
   PAD.addEventListener('pointerdown',function(e){
@@ -636,9 +641,10 @@ sprintBtnEl.addEventListener('pointercancel',e=>{ setSprint(false); });
     if(G.screen!=='play' || g) return;
     const x=e.clientX, y=e.clientY, t=now();
     if(pendTap){ clearTimeout(pendTap); pendTap=null; }
-    const dbl = (t-lastTapT<DBL_MS) && Math.hypot(x-lastTapX,y-lastTapY)<48;
-    g={ id:e.pointerId, ox:x, oy:y, x:x, y:y, t0:t, mode:(dbl?'dash':'aim'), moved:false, charged:false, grace:null, samp:[{x:x,y:y,t:t}] };
-    placeCtl(x,y); show();
+    const c=padCenter();
+    const dbl = (t-lastTapT<DBL_MS);
+    g={ id:e.pointerId, ox:c.x, oy:c.y, x:x, y:y, t0:t, mode:(dbl?'dash':'aim'), moved:false, charged:false, grace:null, samp:[{x:x,y:y,t:t}] };
+    show();
     if(dbl){ setMode('dash'); setSprint(true); G.padActive=true; }
     else { setMode(''); g.grace=setTimeout(function(){ if(g&&g.mode==='aim'&&!g.moved){ g.charged=true; startCharge(); setMode('charge'); } }, GRACE_MS); }
     try{ PAD.setPointerCapture(e.pointerId); }catch(_){}
@@ -745,6 +751,7 @@ function update(dt){
   if(G.sprint && _moving){ G.stamina=Math.max(0,G.stamina-dt/2.2); }
   else { G.stamina=Math.min(1,G.stamina+dt/3.5); }
   el('staminaBar').style.width=(G.stamina*100).toFixed(0)+'%';
+  el('ctl').style.setProperty('--s',(G.stamina*360).toFixed(0)+'deg');
   // シュートチャージ
   if(G.charging){ G.power=Math.min(1,G.power+dt/0.7); el('powerBar').style.width=(G.power*100).toFixed(0)+'%'; el('ctl').style.setProperty('--p',(G.power*360).toFixed(0)+'deg'); }
   else { el('ctl').style.setProperty('--p','0deg'); }
